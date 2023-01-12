@@ -10,7 +10,15 @@ import kotlin.math.min
 
 private enum class FanSpeed(val label: Int) {
     OFF(R.string.fan_off), LOW(R.string.fan_low), MEDIUM(R.string.fan_medium), HIGH(R.string.fan_high);
+
+    fun next() = when (this) {
+        OFF -> LOW
+        LOW -> MEDIUM
+        MEDIUM -> HIGH
+        HIGH -> OFF
+    }
 }
+
 
 private const val RADIUS_OFFSET_LABEL = 30
 private const val RADIUS_OFFSET_INDICATOR = -35
@@ -30,6 +38,20 @@ class DialView @JvmOverloads constructor(
         textAlign = Paint.Align.CENTER
         textSize = 55.0f
         typeface = Typeface.create("", Typeface.BOLD)
+    }
+
+    init {
+        isClickable = true
+    }
+
+    override fun performClick(): Boolean {
+        if (super.performClick()) return true
+
+        fanSpeed = fanSpeed.next()
+        contentDescription = resources.getString(fanSpeed.label)
+
+        invalidate()
+        return true
     }
 
     override fun onSizeChanged(width: Int, height: Int, oldWidth: Int, oldHeight: Int) {
@@ -56,8 +78,8 @@ class DialView @JvmOverloads constructor(
         val markerRadius = radius + RADIUS_OFFSET_INDICATOR
         pointPosition.computeXYForSpeed(fanSpeed, markerRadius)
         paint.color = Color.BLACK
-        canvas.drawCircle(pointPosition.x, pointPosition.y, radius/12, paint)
-        
+        canvas.drawCircle(pointPosition.x, pointPosition.y, radius / 12, paint)
+
         // Draw the text labels.
         val labelRadius = radius + RADIUS_OFFSET_LABEL
         for (i in FanSpeed.values()) {
